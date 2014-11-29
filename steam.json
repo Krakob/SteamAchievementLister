@@ -1,6 +1,5 @@
 {
-	"steamid":"XXXXXXXXXXX",
-	"key":"XXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-	"l":"english",
-	"appid":""
+	"steamid":"private",
+	"key":"secret",
+	"l":"english"
 }
