@@ -1,5 +1,7 @@
 {
-	"steamid":"private",
-	"key":"secret",
-	"l":"english"
+	"steamid": "private",
+	"key": "secret",
+	"l": "english",
+	"include_played_free_games": "1",
+	"include_appinfo": "1"
 }
