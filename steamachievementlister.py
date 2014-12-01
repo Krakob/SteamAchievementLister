@@ -111,10 +111,11 @@ def get_achievements(keys, request_url="http://api.steampowered.com/ISteamUserSt
 
 
 def set_tags(steam_settings):
+    '''Reads tags from a file in tags and applies them to the currently selected active game's file in /responses.'''
     if not 'appid' in steam_settings:
         print("No appid has yet been specified! Tags cannot be written.")
         return None
-
+        
     tags = load_json("tags/%s %s.json" % (steam_settings['appid'], steam_settings['appname']))
     game_data = load_json("responses/%s %s.json" % (steam_settings['appid'], steam_settings['appname']))
     achievements = game_data['playerstats']['achievements']
@@ -162,5 +163,4 @@ if __name__ == "__main__":
     make_folders("responses", "lists", "tags")
 
     set_appid(apps, steam_settings)
-    #get_achievements(steam_settings)
-    set_tags(steam_settings)
+    get_achievements(steam_settings)
