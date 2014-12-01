@@ -1,7 +1,7 @@
 #! python3
 '''
 Gets a list of achievements and slaps them into a list importable to Google Tasks through
-https://import-tasks.appspot.com/main
+https://import-tasks.appspot.com/
 '''
 
 
@@ -111,6 +111,10 @@ def get_achievements(keys, request_url="http://api.steampowered.com/ISteamUserSt
 
 
 def set_tags(steam_settings):
+    if not 'appid' in steam_settings:
+        print("No appid has yet been specified! Tags cannot be written.")
+        return None
+
     tags = load_json("tags/%s %s.json" % (steam_settings['appid'], steam_settings['appname']))
     game_data = load_json("responses/%s %s.json" % (steam_settings['appid'], steam_settings['appname']))
     achievements = game_data['playerstats']['achievements']
@@ -118,8 +122,8 @@ def set_tags(steam_settings):
     for achievement in achievements:                    #Go through every achievement
         for tag in tags:                                #For every achievement, go through all tags
             for field, contents in tags[tag].items():   #And for every tag, go through all of its contents
-                if not contents in achievement[field]:  #Check if everything specified in the tagging is in the achievement.
-                    break                               #Break the loop, triggering the else
+                if not contents in achievement[field]:  #Break if not everything specified in the tagging is in the achievement.
+                    break
             else:
                 achievement['tag'] = tag                #Assign the tag to a new entry in the dict
                 print("Assigning the tag %s to the achievement %s" % (tag, achievement['name']))
@@ -142,6 +146,9 @@ def get_games(keys, request_url="http://api.steampowered.com/IPlayerService/GetO
         dump_json(game_list, "apps.json")
         return game_list
 
+
+def goto_importer(url="https://import-tasks.appspot.com/"):
+    webbrowser.open(url, new=2)
 
 
 ################################
