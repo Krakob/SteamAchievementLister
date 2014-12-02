@@ -9,6 +9,7 @@ https://import-tasks.appspot.com/
 #### Imports
 ################################
 import os
+import csv
 import json
 import requests
 import webbrowser
@@ -58,6 +59,16 @@ def remove_unicode(string):
     '''Removes Unicode escaped sequences such as \u2122 (trademark sign), as found in lots of game names.'''
     return string.encode('ascii', 'ignore').decode()
 
+
+def replace_key(dic, old, new):
+    dic[new] = dic.pop(old)
+
+def remove_keys(dic, *keys):
+    for key in keys:
+        try:
+            del dic[key]
+        except KeyError:
+            pass
 
 def make_folders(*folders):
     '''Creates folders to avoid errors from get_achievements' json dumping.'''
@@ -152,6 +163,41 @@ def goto_importer(url="https://import-tasks.appspot.com/"):
     webbrowser.open(url, new=2)
 
 
+def export_list(steam_settings):
+    achievements = load_json("responses/%s %s.json" % (steam_settings['appid'], steam_settings['appname']))['playerstats']['achievements']
+    header = ("tasklist_name","title","notes","status","depth")
+    output_list = []
+    tags = []
+    for achievement in achievements:
+        if not 'tag' in achievement: #Verify that all achievements contain a tag.
+            print("A tag could not be found in the achievement %s, please add tags and try again." % achievement ['name'])
+            return None
+        else:
+            if not achievement['tag'] in tags:
+                tags.append(achievement['tag'])
+
+        achievement['tasklist_name'] = steam_settings['appname']
+        replace_key(achievement, 'name', 'title')
+        replace_key(achievement, 'description', 'notes')
+        achievement['status'] = "needsAction" if achievement["achieved"] == 0 else 'completed'
+        achievement['depth'] = 1
+
+    for tag in tags:
+        output_list.append({'tasklist_name': steam_settings['appname'], 'title': tag, 'notes': '', 'status': 'needsAction', 'depth': 0}) #Why did I hardcore this
+        for achievement in achievements:
+            if achievement['tag'] == tag:
+                output_list.append(achievement)
+
+    for achievement in output_list:
+        remove_keys(achievement, 'apiname', 'achieved', 'tag') #Clear up leftover keys.
+        #print('\t'*achievement['depth'], achievement)
+
+    with open("lists/%s %s" % (steam_settings['appid'], steam_settings['appname']), 'w', newline = '') as f:
+        writer = csv.DictWriter(f, header)
+        writer.writeheader()
+        writer.writerows(output_list)
+
+
 ################################
 #### Main code
 ################################
@@ -163,4 +209,5 @@ if __name__ == "__main__":
     make_folders("responses", "lists", "tags")
 
     set_appid(apps, steam_settings)
-    get_achievements(steam_settings)
+    set_tags(steam_settings)
+    export_list(steam_settings)
