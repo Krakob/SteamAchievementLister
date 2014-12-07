@@ -2,6 +2,6 @@ hiddensteam.json
 steam.json
 apps.json
 
-responses/*
-lists/*
-tags/*
+responses/
+lists/
+tags/

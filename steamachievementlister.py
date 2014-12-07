@@ -63,12 +63,14 @@ def remove_unicode(string):
 def replace_key(dic, old, new):
     dic[new] = dic.pop(old)
 
+
 def remove_keys(dic, *keys):
     for key in keys:
         try:
             del dic[key]
         except KeyError:
             pass
+
 
 def make_folders(*folders):
     '''Creates folders to avoid errors from get_achievements' json dumping.'''
@@ -104,7 +106,7 @@ def dump_json(dic, filename):
         json.dump(dic, f, indent=4)
 
 
-def set_appid(apps, steam_settings):
+def set_appid(steam_settings, apps):
     print("Choose Steam application to work with.")
     steam_settings["appname"], steam_settings["appid"] = input_multichoice(apps)
 
@@ -164,10 +166,15 @@ def goto_importer(url="https://import-tasks.appspot.com/"):
 
 
 def export_list(steam_settings):
+    if not 'appid' in steam_settings:
+        print("No appid has yet been specified! Tags cannot be written.")
+        return None
+
     achievements = load_json("responses/%s %s.json" % (steam_settings['appid'], steam_settings['appname']))['playerstats']['achievements']
     header = ("tasklist_name","title","notes","status","depth")
     output_list = []
     tags = []
+
     for achievement in achievements:
         if not 'tag' in achievement: #Verify that all achievements contain a tag.
             print("A tag could not be found in the achievement %s, please add tags and try again." % achievement ['name'])
@@ -192,10 +199,35 @@ def export_list(steam_settings):
         remove_keys(achievement, 'apiname', 'achieved', 'tag') #Clear up leftover keys.
         #print('\t'*achievement['depth'], achievement)
 
-    with open("lists/%s %s" % (steam_settings['appid'], steam_settings['appname']), 'w', newline = '') as f:
+    with open("lists/%s %s.csv" % (steam_settings['appid'], steam_settings['appname']), 'w', newline = '') as f:
         writer = csv.DictWriter(f, header)
         writer.writeheader()
         writer.writerows(output_list)
+
+
+################################
+#### UI wrapper functions
+################################
+def u_exit():
+    exit("You have decided to quit, congratulations! Press enter to quit.")
+
+def u_goto_importer():
+    goto_importer()
+
+def u_get_games():
+    get_games(steam_settings)
+
+def u_set_appid():
+    set_appid(steam_settings, apps)
+
+def u_get_achievements():
+    get_achievements(steam_settings)
+
+def u_set_tags():
+    set_tags(steam_settings)
+
+def u_export_list():
+    export_list(steam_settings)
 
 
 ################################
@@ -204,10 +236,33 @@ def export_list(steam_settings):
 if __name__ == "__main__":
     clear()
     print("╔════════════════════════════════════╗\n║ Running Steam Achievements lister! ║\n╚════════════════════════════════════╝\n")
-    apps = load_json("apps.json")
+    make_folders("responses", "lists", "tags", "debug")
     steam_settings = load_json("steam.json")
-    make_folders("responses", "lists", "tags")
+    try:
+        apps = load_json("apps.json")
+    except FileNotFoundError:
+        if get_games(steam_settings) == None: #Ask the user to get a game list, exit if they don't wish to.
+            exit()
+        else:
+            apps = load_json("apps.json")
+    except ValueError:
+        exit()
 
-    set_appid(apps, steam_settings)
-    set_tags(steam_settings)
-    export_list(steam_settings)
+    actions = (
+        ('Quit', u_exit),
+        ('Open importer', u_goto_importer),
+        ('Get games', u_get_games),
+        ('Set app', u_set_appid),
+        ('Get achievements', u_get_achievements),
+        ('Tag', u_set_tags),
+        ('Export', u_export_list)
+    )
+
+
+    while True:
+        print("\nPlease select an action (input a digit).")
+        i = 1
+        for action in actions:
+            print(" %s - %s" % (i, action[0]))
+            i += 1
+        actions[int(input())-1][1]()
