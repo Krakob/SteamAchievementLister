@@ -236,7 +236,7 @@ def u_export_list():
 if __name__ == "__main__":
     clear()
     print("╔════════════════════════════════════╗\n║ Running Steam Achievements lister! ║\n╚════════════════════════════════════╝\n")
-    make_folders("responses", "lists", "tags", "debug")
+    make_folders("responses", "lists", "tags")
     steam_settings = load_json("steam.json")
     try:
         apps = load_json("apps.json")
