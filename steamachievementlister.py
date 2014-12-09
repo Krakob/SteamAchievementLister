@@ -249,13 +249,13 @@ if __name__ == "__main__":
         exit()
 
     actions = (
-        ('Quit', u_exit),
-        ('Open importer', u_goto_importer),
-        ('Get games', u_get_games),
-        ('Set app', u_set_appid),
-        ('Get achievements', u_get_achievements),
-        ('Tag', u_set_tags),
-        ('Export', u_export_list)
+        ('Quit',            u_exit),
+        ('Open importer',   u_goto_importer),
+        ('Get games',       u_get_games),
+        ('Set app',         u_set_appid),
+        ('Get achievements',u_get_achievements),
+        ('Tag',             u_set_tags),
+        ('Export',          u_export_list)
     )
 
 
@@ -265,4 +265,5 @@ if __name__ == "__main__":
         for action in actions:
             print(" %s - %s" % (i, action[0]))
             i += 1
-        actions[int(input())-1][1]()
+        actions[int(input())-1][1]() #Takes user's input -1 to align it with an index-0 list.
+                                     #The following [1] points to the function assigned in the list and it is then executed.
